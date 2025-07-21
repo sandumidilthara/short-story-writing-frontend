@@ -1,6 +1,48 @@
 
 
-export  function Home() {
+
+import { useNavigate } from "react-router-dom";
+
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '../../../store/store.ts';
+import {
+    getAllCategories,
+    toggleDropdown,
+    selectCategory, closeDropdown
+} from '../../../slices/homeSlice.ts';
+
+export function Home() {
+
+
+    const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+    const {
+        categories,
+        loading,
+        error,
+        isDropdownOpen,
+
+    } = useSelector((state: RootState) => state.home);
+
+    const handleToggleDropdown = () => {
+        dispatch(toggleDropdown());
+        // Fetch categories when opening dropdown for the first time
+        if (!isDropdownOpen && categories.length === 0) {
+            dispatch(getAllCategories());
+        }
+    };
+
+    const handleSelectCategory = (category: any) => {
+        dispatch(selectCategory(category));
+        dispatch(closeDropdown());
+        navigate(`/category/${category.name}`); // Go to dynamic page
+    };
+    // const handleSelectCategory = (category: any) => {
+    //     console.log('Selected category:', category);
+    //     dispatch(selectCategory(category));
+    //     // Add your category selection logic here
+    // };
+
     const features = [
         {
             icon: "✍️",
@@ -54,7 +96,6 @@ export  function Home() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-
             {/* Hero Section */}
             <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-transparent to-blue-100 opacity-50"></div>
@@ -79,13 +120,65 @@ export  function Home() {
                                     <span className="mr-2">✍️</span>
                                     Start Writing Today
                                 </button>
-                                <button className="border-2 border-purple-600 text-purple-600 px-8 py-4 rounded-xl hover:bg-purple-600 hover:text-white transition duration-300 flex items-center justify-center font-semibold">
-                                    <span className="mr-2">⭐</span>
-                                    See Success Stories
-                                </button>
+
+                                {/* Dropdown Button */}
+                                <div className="relative">
+                                    <button
+                                        onClick={handleToggleDropdown}
+                                        className="border-2 border-purple-600 text-purple-600 px-8 py-4 rounded-xl hover:bg-purple-600 hover:text-white transition duration-300 flex items-center justify-center font-semibold w-full sm:w-auto"
+                                    >
+                                        <span className="mr-2">⭐</span>
+                                        See Success Stories
+                                        <svg
+                                            className={`ml-2 h-4 w-4 transform transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    {/* Dropdown Menu */}
+                                    {isDropdownOpen && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
+                                            {loading && (
+                                                <div className="px-4 py-3 text-gray-500 text-sm flex items-center">
+                                                    <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Loading categories...
+                                                </div>
+                                            )}
+
+                                            {error && (
+                                                <div className="px-4 py-3 text-red-500 text-sm">
+                                                    Error: {error}
+                                                </div>
+                                            )}
+
+                                            {!loading && !error && categories.length === 0 && (
+                                                <div className="px-4 py-3 text-gray-500 text-sm">
+                                                    No categories found
+                                                </div>
+                                            )}
 
 
+                                            {!loading && categories.length > 0 && categories.map((category, index) => (
+                                                <button
+                                                    key={category.id || index}
+                                                    onClick={() => handleSelectCategory(category)}
+                                                    className="w-full text-left px-4 py-3 hover:bg-purple-50 hover:text-purple-600 transition duration-200 text-sm border-b border-gray-100 last:border-b-0"
+                                                >
+                                                    {category.name || 'Unknown Category'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
                             <div className="flex items-center space-x-6 pt-4">
                                 <div className="text-center">
                                     <div className="text-2xl font-bold text-gray-900">50K+</div>
@@ -137,6 +230,7 @@ export  function Home() {
             </section>
 
             {/* Features Section */}
+            {/* Features Section */}
             <section id="features" className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
@@ -168,7 +262,6 @@ export  function Home() {
                     </div>
                 </div>
             </section>
-
             {/* Benefits Section */}
             <section id="benefits" className="py-20 bg-gradient-to-br from-purple-50 to-blue-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -206,69 +299,8 @@ export  function Home() {
                 </div>
             </section>
 
-            {/*/!* Community Section *!/*/}
-            {/*<section id="community" className="py-20 bg-gradient-to-r from-purple-600 to-blue-600 relative overflow-hidden">*/}
-            {/*    <div className="absolute inset-0 bg-black/10"></div>*/}
-            {/*    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">*/}
-            {/*        <div className="text-center text-white">*/}
-            {/*            <h2 className="text-4xl lg:text-5xl font-bold mb-6">*/}
-            {/*                Join 50,000+ Successful Writers*/}
-            {/*            </h2>*/}
-            {/*            <p className="text-xl mb-12 text-purple-100 max-w-3xl mx-auto">*/}
-            {/*                Our community is thriving with writers who have turned their passion into successful careers.*/}
-            {/*                You could be next!*/}
-            {/*            </p>*/}
-
-            {/*            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-12">*/}
-            {/*                <div className="text-center">*/}
-            {/*                    <div className="text-4xl lg:text-5xl font-bold mb-2">$2.5M+</div>*/}
-            {/*                    <div className="text-purple-200">Total Earnings</div>*/}
-            {/*                </div>*/}
-            {/*                <div className="text-center">*/}
-            {/*                    <div className="text-4xl lg:text-5xl font-bold mb-2">150+</div>*/}
-            {/*                    <div className="text-purple-200">Countries</div>*/}
-            {/*                </div>*/}
-            {/*                <div className="text-center">*/}
-            {/*                    <div className="text-4xl lg:text-5xl font-bold mb-2">500K+</div>*/}
-            {/*                    <div className="text-purple-200">Success Stories</div>*/}
-            {/*                </div>*/}
-            {/*                <div className="text-center">*/}
-            {/*                    <div className="text-4xl lg:text-5xl font-bold mb-2">24/7</div>*/}
-            {/*                    <div className="text-purple-200">Support</div>*/}
-            {/*                </div>*/}
-            {/*            </div>*/}
-
-            {/*            <button className="bg-white text-purple-600 px-12 py-4 rounded-xl hover:bg-gray-100 transition duration-300 text-lg font-bold transform hover:scale-105">*/}
-            {/*                Join Our Community*/}
-            {/*            </button>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</section>*/}
-
-            {/*/!* CTA Section *!/*/}
-            {/*<section className="py-20 bg-white">*/}
-            {/*    <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">*/}
-            {/*        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-12 shadow-xl">*/}
-            {/*            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">*/}
-            {/*                Ready to Start Your*/}
-            {/*                <span className="text-purple-600"> Writing Journey?</span>*/}
-            {/*            </h2>*/}
-            {/*            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">*/}
-            {/*                Join thousands of writers who have already discovered the power of our platform.*/}
-            {/*                Your stories are waiting to be told.*/}
-            {/*            </p>*/}
-            {/*            <div className="flex flex-col sm:flex-row gap-4 justify-center">*/}
-            {/*                <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-12 py-4 rounded-xl hover:shadow-xl transform hover:scale-105 transition duration-300 text-lg font-bold">*/}
-            {/*                    Get Started Free*/}
-            {/*                </button>*/}
-            {/*                <button className="border-2 border-purple-600 text-purple-600 px-12 py-4 rounded-xl hover:bg-purple-600 hover:text-white transition duration-300 text-lg font-bold">*/}
-            {/*                    Schedule Demo*/}
-            {/*                </button>*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</section>*/}
-
         </div>
     );
 }
+
+
