@@ -1,5 +1,13 @@
-import { Link } from "react-router-dom";
+import {Link} from "react-router-dom";
+
+
+
+
 export  function Navbar() {
+
+
+
+
 
     return (
 
@@ -23,6 +31,8 @@ export  function Navbar() {
                         <a href="/startWriting"
                            className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">Start
                             Writing</a>
+
+
                         {/*<a href="/seeStories"*/}
                         {/*   className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">See*/}
                         {/*    Stories</a>*/}
@@ -33,8 +43,8 @@ export  function Navbar() {
                     </div>
                     <div className="flex space-x-4">
                         <Link to="/login">
-                        <button
-                            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition duration-300">Sign
+                            <button
+                                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition duration-300">Sign
                             In
                         </button>
                         </Link>

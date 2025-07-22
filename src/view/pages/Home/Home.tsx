@@ -1,6 +1,6 @@
 
 
-
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -37,11 +37,7 @@ export function Home() {
         dispatch(closeDropdown());
         navigate(`/category/${category.name}`); // Go to dynamic page
     };
-    // const handleSelectCategory = (category: any) => {
-    //     console.log('Selected category:', category);
-    //     dispatch(selectCategory(category));
-    //     // Add your category selection logic here
-    // };
+
 
     const features = [
         {
@@ -116,10 +112,15 @@ export function Home() {
                                 Write, publish, earn, and connect with millions of readers globally.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl hover:shadow-xl transform hover:scale-105 transition duration-300 flex items-center justify-center font-semibold">
+
+
+                                <Link
+                                    to="/startWriting"
+                                    className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl hover:shadow-xl transform hover:scale-105 transition duration-300 flex items-center justify-center font-semibold"
+                                >
                                     <span className="mr-2">✍️</span>
                                     Start Writing Today
-                                </button>
+                                </Link>
 
                                 {/* Dropdown Button */}
                                 <div className="relative">
