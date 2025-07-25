@@ -46,7 +46,7 @@ export const createStoryRequest = createAsyncThunk(
     }
 );
 
-// Stories සියල්ල get කරන async thunk
+
 export const getAllStoriesRequest = createAsyncThunk(
     'story/getAll',
     async () => {
@@ -55,7 +55,7 @@ export const getAllStoriesRequest = createAsyncThunk(
     }
 );
 
-// Category අනුව stories get කරන async thunk
+
 export const getStoriesByCategoryRequest = createAsyncThunk(
     'story/getByCategory',
     async (categoryName: string) => {
@@ -64,7 +64,7 @@ export const getStoriesByCategoryRequest = createAsyncThunk(
     }
 );
 
-// Single story get කරන async thunk
+
 export const getStoryByIdRequest = createAsyncThunk(
     'story/getById',
     async (storyId: string) => {
@@ -89,26 +89,26 @@ const startWritingSlice = createSlice({
             state.error = null;
             state.success = false;
         },
-        // Form field update කරන actions
+
         updateFormField: (state, action) => {
             const { field, value } = action.payload;
             (state as any)[field] = value;
         },
-        // Error clear කරන action
+
         clearError: (state) => {
             state.error = null;
         },
-        // Success state reset කරන action
+
         resetSuccess: (state) => {
             state.success = false;
         },
-        // CreatedAt update කරන action
+
         updateCreatedAt: (state) => {
             state.createdAt = new Date();
         }
     },
     extraReducers: (builder) => {
-        // Create Story Cases
+
         builder
             .addCase(createStoryRequest.pending, (state) => {
                 state.loading = true;
@@ -137,7 +137,7 @@ const startWritingSlice = createSlice({
                 alert("Error creating story: " + state.error);
             })
 
-        // Get All Stories Cases
+
         builder
             .addCase(getAllStoriesRequest.pending, (state) => {
                 state.loading = true;
@@ -153,7 +153,7 @@ const startWritingSlice = createSlice({
                 alert("Error fetching stories: " + state.error);
             })
 
-        // Get Stories By Category Cases
+
         builder
             .addCase(getStoriesByCategoryRequest.pending, (state) => {
                 state.loading = true;
@@ -169,7 +169,7 @@ const startWritingSlice = createSlice({
                 alert("Error fetching category stories: " + state.error);
             })
 
-        // Get Story By ID Cases
+
         builder
             .addCase(getStoryByIdRequest.pending, (state) => {
                 state.loading = true;
@@ -187,7 +187,7 @@ const startWritingSlice = createSlice({
     }
 });
 
-// Actions export කරනවා
+
 export const {
     clearForm,
     updateFormField,
@@ -196,6 +196,6 @@ export const {
     updateCreatedAt
 } = startWritingSlice.actions;
 
-// Reducer export කරනවා
+
 export const startWritingReducer = startWritingSlice.reducer;
 export default startWritingSlice.reducer

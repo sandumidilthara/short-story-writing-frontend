@@ -1,6 +1,108 @@
-import { Link } from "react-router-dom";
+
+
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '../../../store/store.ts';
+import {
+    registerUser,
+    updateFormField,
+    clearForm,
+    clearError,
+    resetSuccess
+} from '../../../slices/registerSlice.ts';
 
 export function Register() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+
+    const {
+        name,
+        email,
+        password,
+        termsAccepted,
+        loading,
+        error,
+        success
+    } = useSelector((state: RootState) => state.register);
+
+    // Handle success navigation
+    useEffect(() => {
+        if (success) {
+            // Show success alert
+            alert('🎉 Account created successfully! You can now sign in.');
+            // Navigate to login page after successful registration
+            navigate('/login');
+            dispatch(resetSuccess());
+        }
+    }, [success, navigate, dispatch]);
+
+    // Clear any existing errors when component mounts
+    useEffect(() => {
+        dispatch(clearError());
+        return () => {
+            dispatch(clearForm());
+        };
+    }, [dispatch]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name: fieldName, value, type, checked } = e.target;
+        const fieldValue = type === 'checkbox' ? checked : value;
+        dispatch(updateFormField({ field: fieldName, value: fieldValue }));
+    };
+
+    const validateForm = (): boolean => {
+        if (!name.trim()) {
+            alert('Full name is required');
+            return false;
+        }
+
+        if (!email.trim()) {
+            alert('Email is required');
+            return false;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert('Please enter a valid email address');
+            return false;
+        }
+
+        if (!password.trim()) {
+            alert('Password is required');
+            return false;
+        }
+
+        if (password.length < 6) {
+            alert('Password should be at least 6 characters long');
+            return false;
+        }
+
+        if (!termsAccepted) {
+            alert('Please accept the Terms of Service and Privacy Policy');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        // Dispatch the register user action
+        dispatch(registerUser({
+            name,
+            email,
+            password,
+            role: 'USER' // Default role for new users
+        }));
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4">
             {/* Background Decorative Elements */}
@@ -28,18 +130,22 @@ export function Register() {
                     </div>
 
                     {/* Register Form */}
-                    <form className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Full Name Field */}
                         <div className="space-y-2">
-                            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                                 Full Name
                             </label>
                             <div className="relative">
                                 <input
-                                    id="fullName"
+                                    id="name"
+                                    name="name"
                                     type="text"
+                                    value={name}
+                                    onChange={handleInputChange}
                                     placeholder="Enter your full name"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition duration-300 bg-white/50"
+                                    disabled={loading}
                                 />
                                 <div className="absolute right-3 top-3.5 text-gray-400">
                                     👤
@@ -55,9 +161,13 @@ export function Register() {
                             <div className="relative">
                                 <input
                                     id="email"
+                                    name="email"
                                     type="email"
+                                    value={email}
+                                    onChange={handleInputChange}
                                     placeholder="Enter your email"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition duration-300 bg-white/50"
+                                    disabled={loading}
                                 />
                                 <div className="absolute right-3 top-3.5 text-gray-400">
                                     📧
@@ -73,27 +183,32 @@ export function Register() {
                             <div className="relative">
                                 <input
                                     id="password"
+                                    name="password"
                                     type="password"
+                                    value={password}
+                                    onChange={handleInputChange}
                                     placeholder="Create a strong password"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition duration-300 bg-white/50"
+                                    disabled={loading}
                                 />
                                 <div className="absolute right-3 top-3.5 text-gray-400">
                                     🔒
                                 </div>
                             </div>
-
                         </div>
-
-
 
                         {/* Terms and Conditions */}
                         <div className="flex items-start space-x-3">
                             <input
                                 type="checkbox"
-                                id="terms"
+                                id="termsAccepted"
+                                name="termsAccepted"
+                                checked={termsAccepted}
+                                onChange={handleInputChange}
                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
+                                disabled={loading}
                             />
-                            <label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed">
+                            <label htmlFor="termsAccepted" className="text-sm text-gray-600 leading-relaxed">
                                 I agree to the{" "}
                                 <button type="button" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
                                     Terms of Service
@@ -105,18 +220,39 @@ export function Register() {
                             </label>
                         </div>
 
+                        {/* Error Display */}
+                        {error && (
+                            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                                <div className="flex items-center">
+                                    <span className="text-red-500 mr-2">⚠️</span>
+                                    <span className="text-red-700 font-medium">Error: {error}</span>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Register Button */}
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-xl transform hover:scale-[1.02] transition duration-300 flex items-center justify-center"
+                            disabled={loading}
+                            className={`w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-xl transform hover:scale-[1.02] transition duration-300 flex items-center justify-center ${
+                                loading ? 'opacity-75 cursor-not-allowed' : ''
+                            }`}
                         >
-                            <span className="mr-2">🎉</span>
-                            Create Your Account
+                            {loading ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Creating Account...
+                                </>
+                            ) : (
+                                <>
+                                    <span className="mr-2">🎉</span>
+                                    Create Your Account
+                                </>
+                            )}
                         </button>
-
-
-
-
                     </form>
 
                     {/* Login Link */}
@@ -124,9 +260,9 @@ export function Register() {
                         <p className="text-gray-600">
                             Already have an account?{" "}
                             <Link to="/login">
-                            <button className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition duration-300">
-                                Sign In
-                            </button>
+                                <button className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition duration-300">
+                                    Sign In
+                                </button>
                             </Link>
                         </p>
                     </div>
