@@ -31,11 +31,13 @@ export  function Navbar() {
                         <a href="/startWriting"
                            className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">Start
                             Writing</a>
-
-
                         {/*<a href="/seeStories"*/}
                         {/*   className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">See*/}
                         {/*    Stories</a>*/}
+
+                        <a href="/myStories"
+                           className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">My
+                            Stories</a>
                         <a href="/contact"
                            className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">Contact
                             Us</a>

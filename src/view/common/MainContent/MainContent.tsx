@@ -10,6 +10,7 @@ import {StoryDetail} from "../../pages/StoryDetail/StoryDetail.tsx";
 
 
 
+
 export function MainContent() {
     return (
         <div className="bg-stone-100 p-8 flex items-center justify-center text-center text-3xl min-h-96">
@@ -20,6 +21,7 @@ export function MainContent() {
                 <Route path="/contact" element={<Contact />}/>
                 <Route path="/category/:categoryName" element={<CategorizeStories />} />
                 <Route path="/story/:storyId" element={<StoryDetail />} />
+
 
             </Routes>
         </div>

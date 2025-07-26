@@ -3,8 +3,13 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {DefaultLayout} from "./view/common/DefaultLayout/DefaultLayout.tsx";
 import {Login} from "./view/pages/Login/Login.tsx";
 import {Register} from "./view/pages/Register/Register.tsx";
-// import {Login} from "./view/pages/Login/Login.tsx";
+
+
+
+
 function App() {
+
+
     return(
         <BrowserRouter>
             <Routes>

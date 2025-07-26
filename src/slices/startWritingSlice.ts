@@ -1,3 +1,5 @@
+
+
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { backendApi } from "../api.ts";
 
@@ -8,12 +10,12 @@ interface StoryFormData {
     imageUrl: string;
     author: string;
     authorEmail: string;
-    createdAt: Date;
+    createdAt: string;
     error: string | null | undefined;
     loading: boolean;
     success: boolean;
+    isAuthenticated: boolean;
 }
-
 
 const initialState: StoryFormData = {
     name: '',
@@ -22,13 +24,14 @@ const initialState: StoryFormData = {
     imageUrl: '',
     author: 'Anonymous Writer',
     authorEmail: 'anonymous@storyapp.com',
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
     error: null,
     loading: false,
     success: false,
+    isAuthenticated: false,
 };
 
-// Story create කරන async thunk
+// Story create කරන async thunk with JWT token
 export const createStoryRequest = createAsyncThunk(
     'story/create',
     async (data: {
@@ -38,15 +41,29 @@ export const createStoryRequest = createAsyncThunk(
         imageUrl: string;
         author: string;
         authorEmail: string;
-        createdAt: Date;
+        createdAt: string;
     }) => {
-        const response = await backendApi.post("/story/save", data);
+        // Get JWT token from storage
+        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        // Add token to request headers
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        };
+
+        const response = await backendApi.post("/story/save", data, config);
         const message = response.data.message;
         alert(message);
-        return response.data; // Return data for fulfilled case
+        return response.data;
     }
 );
-
 
 export const getAllStoriesRequest = createAsyncThunk(
     'story/getAll',
@@ -56,7 +73,6 @@ export const getAllStoriesRequest = createAsyncThunk(
     }
 );
 
-
 export const getStoriesByCategoryRequest = createAsyncThunk(
     'story/getByCategory',
     async (categoryName: string) => {
@@ -64,7 +80,6 @@ export const getStoriesByCategoryRequest = createAsyncThunk(
         return response.data;
     }
 );
-
 
 export const getStoryByIdRequest = createAsyncThunk(
     'story/getById',
@@ -84,9 +99,12 @@ const startWritingSlice = createSlice({
             state.category = '';
             state.content = '';
             state.imageUrl = '';
-            state.author = 'Anonymous Writer';
-            state.authorEmail = 'anonymous@storyapp.com';
-            state.createdAt = new Date();
+            // Don't reset author info if user is authenticated
+            if (!state.isAuthenticated) {
+                state.author = 'Anonymous Writer';
+                state.authorEmail = 'anonymous@storyapp.com';
+            }
+            state.createdAt = new Date().toISOString();
             state.error = null;
             state.success = false;
         },
@@ -105,11 +123,25 @@ const startWritingSlice = createSlice({
         },
 
         updateCreatedAt: (state) => {
-            state.createdAt = new Date();
+            state.createdAt = new Date().toISOString();
+        },
+
+        // Set user info from JWT token
+        setUserFromToken: (state, action) => {
+            const { email, username } = action.payload;
+            state.author = username;
+            state.authorEmail = email;
+            state.isAuthenticated = true;
+        },
+
+        // Clear authentication
+        clearAuthentication: (state) => {
+            state.author = 'Anonymous Writer';
+            state.authorEmail = 'anonymous@storyapp.com';
+            state.isAuthenticated = false;
         }
     },
     extraReducers: (builder) => {
-
         builder
             .addCase(createStoryRequest.pending, (state) => {
                 state.loading = true;
@@ -121,23 +153,29 @@ const startWritingSlice = createSlice({
                 state.loading = false;
                 state.success = true;
                 state.error = null;
-                // Clear form after successful submission
+                // Clear form after successful submission but keep user info
                 state.name = '';
                 state.category = '';
                 state.content = '';
                 state.imageUrl = '';
-                state.author = 'Anonymous Writer';
-                state.authorEmail = 'anonymous@storyapp.com';
-                state.createdAt = new Date();
+                state.createdAt = new Date().toISOString();
                 alert("Story created successfully!");
             })
             .addCase(createStoryRequest.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
                 state.error = action.error.message;
-                alert("Error creating story: " + state.error);
-            })
 
+                // Check if error is related to authentication
+                if (action.error.message?.includes('authentication') ||
+                    action.error.message?.includes('token') ||
+                    action.error.message?.includes('unauthorized')) {
+                    state.isAuthenticated = false;
+                    alert("Authentication expired. Please log in again.");
+                } else {
+                    alert("Error creating story: " + state.error);
+                }
+            });
 
         builder
             .addCase(getAllStoriesRequest.pending, (state) => {
@@ -152,8 +190,7 @@ const startWritingSlice = createSlice({
                 state.loading = false;
                 state.error = action.error.message;
                 alert("Error fetching stories: " + state.error);
-            })
-
+            });
 
         builder
             .addCase(getStoriesByCategoryRequest.pending, (state) => {
@@ -168,8 +205,7 @@ const startWritingSlice = createSlice({
                 state.loading = false;
                 state.error = action.error.message;
                 alert("Error fetching category stories: " + state.error);
-            })
-
+            });
 
         builder
             .addCase(getStoryByIdRequest.pending, (state) => {
@@ -188,15 +224,15 @@ const startWritingSlice = createSlice({
     }
 });
 
-
 export const {
     clearForm,
     updateFormField,
     clearError,
     resetSuccess,
-    updateCreatedAt
+    updateCreatedAt,
+    setUserFromToken,
+    clearAuthentication
 } = startWritingSlice.actions;
 
-
 export const startWritingReducer = startWritingSlice.reducer;
-export default startWritingSlice.reducer
+export default startWritingSlice.reducer;
