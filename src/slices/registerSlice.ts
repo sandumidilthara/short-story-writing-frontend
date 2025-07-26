@@ -102,3 +102,4 @@ const registerSlice = createSlice({
 
 export const { updateFormField, clearForm, clearError, resetSuccess } = registerSlice.actions;
 export default registerSlice.reducer;
+

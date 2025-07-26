@@ -14,6 +14,7 @@ interface StoryFormData {
     success: boolean;
 }
 
+
 const initialState: StoryFormData = {
     name: '',
     category: '',
