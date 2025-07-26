@@ -11,6 +11,7 @@ import {StoryDetail} from "../../pages/StoryDetail/StoryDetail.tsx";
 
 
 
+
 export function MainContent() {
     return (
         <div className="bg-stone-100 p-8 flex items-center justify-center text-center text-3xl min-h-96">
