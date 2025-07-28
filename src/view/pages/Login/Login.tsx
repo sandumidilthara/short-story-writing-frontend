@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { backendApi } from "../../../api.ts"; // Adjust import path as needed
+import { backendApi } from "../../../api.ts";
 
 type FormData = {
     email: string;
@@ -24,17 +24,17 @@ export function Login() {
         setIsLoading(true);
 
         try {
-            // Make actual API call to backend
+
             const response = await backendApi.post('/auth/login', {
                 email: formData.email,
                 password: formData.password
             });
 
-            // Debug: Log the full response to see the structure
+
             console.log('Full API Response:', response);
             console.log('Response Data:', response.data);
 
-            // Try different possible token field names
+
             const responseData = response.data;
             let token = null;
 
@@ -56,19 +56,20 @@ export function Login() {
             console.log('Extracted Token:', token);
 
             if (token) {
-                // Store JWT token in localStorage
-                localStorage.setItem('authToken', token);
 
-                // Store user info if available
+                localStorage.setItem('token', token);
+
+
                 const user = responseData.user || responseData.userInfo || responseData.userData;
                 if (user) {
                     localStorage.setItem('userInfo', JSON.stringify(user));
+                    console.log(localStorage.getItem("userInfo"))
                 }
 
                 const message = responseData.message || responseData.msg || "Successfully logged in!";
                 alert(message);
 
-                // Navigate to home or redirect to where user was trying to go
+
                 const redirectTo = sessionStorage.getItem('redirectAfterLogin') || '/';
                 sessionStorage.removeItem('redirectAfterLogin');
                 navigate(redirectTo);
@@ -232,3 +233,5 @@ export function Login() {
         </div>
     );
 }
+
+

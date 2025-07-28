@@ -44,7 +44,7 @@ export const createStoryRequest = createAsyncThunk(
         createdAt: string;
     }) => {
         // Get JWT token from storage
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         if (!token) {
             throw new Error('No authentication token found');

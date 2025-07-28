@@ -14,7 +14,7 @@ import {
     setUserFromToken
 } from '../../../slices/startWritingSlice.ts';
 
-// JWT decode utility function
+
 const decodeJWT = (token: string) => {
     try {
         const base64Url = token.split('.')[1];
@@ -29,7 +29,7 @@ const decodeJWT = (token: string) => {
     }
 };
 
-// Check if token is expired - existing JWT decode logic use karala
+
 const isTokenExpired = (token: string): boolean => {
     try {
         const decoded = decodeJWT(token);
@@ -45,21 +45,21 @@ const isTokenExpired = (token: string): boolean => {
     }
 };
 
-// Auto logout function
+
 const performAutoLogout = (navigate: any, dispatch: any, message: string = 'Your session has expired. Please log in again.') => {
-    // Clear all tokens
-    localStorage.removeItem('authToken');
-    sessionStorage.removeItem('authToken');
+
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     sessionStorage.removeItem('refreshToken');
 
-    // Clear form data
+
     dispatch(clearForm());
 
-    // Show alert
+
     alert(message);
 
-    // Redirect to login
+
     navigate('/login');
 };
 
@@ -69,7 +69,7 @@ export function StartWritting() {
     const intervalRef = useRef<number | null>(null);
     const warningShownRef = useRef<boolean>(false);
 
-    // Get data from both slices
+
     const { categories, loading: categoriesLoading } = useSelector((state: RootState) => state.home);
     const {
         name,
@@ -85,9 +85,9 @@ export function StartWritting() {
         isAuthenticated
     } = useSelector((state: RootState) => state.write);
 
-    // Auto logout check function
+
     const checkTokenExpiry = useCallback(() => {
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         if (!token) {
             performAutoLogout(navigate, dispatch, 'Please log in to continue.');
@@ -99,37 +99,37 @@ export function StartWritting() {
             return;
         }
 
-        // Check if token will expire in next 5 minutes (warning)
+
         const decoded = decodeJWT(token);
         if (decoded && decoded.exp) {
             const currentTime = Math.floor(Date.now() / 1000);
             const timeUntilExpiry = decoded.exp - currentTime;
 
-            // Show warning if token expires in 5 minutes (show only once)
+
             if (timeUntilExpiry <= 300 && timeUntilExpiry > 0 && !warningShownRef.current) {
                 warningShownRef.current = true;
                 const minutes = Math.ceil(timeUntilExpiry / 60);
                 alert(`Your session will expire in ${minutes} minute(s). Please save your work and refresh the page to continue.`);
             }
 
-            // Reset warning if time is more than 5 minutes
+
             if (timeUntilExpiry > 300) {
                 warningShownRef.current = false;
             }
         }
     }, [navigate, dispatch]);
 
-    // Setup auto logout interval
+
     useEffect(() => {
-        // Check immediately
+
         checkTokenExpiry();
 
-        // Set up interval to check every minute
+
         intervalRef.current = setInterval(() => {
             checkTokenExpiry();
-        }, 60000); // Check every 60 seconds
+        }, 60000);
 
-        // Cleanup interval on component unmount
+
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -137,9 +137,9 @@ export function StartWritting() {
         };
     }, [checkTokenExpiry]);
 
-    // Check authentication and extract user info from JWT
+
     useEffect(() => {
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         if (!token) {
             performAutoLogout(navigate, dispatch, 'Please log in to write a story');
@@ -157,7 +157,7 @@ export function StartWritting() {
             return;
         }
 
-        // Extract user info from token and set in state
+
         const userEmail = decodedToken.email || decodedToken.sub || '';
         const username = decodedToken.username || decodedToken.name || userEmail.split('@')[0] || 'Anonymous';
 
@@ -168,14 +168,14 @@ export function StartWritting() {
 
     }, [dispatch, navigate]);
 
-    // Fetch categories when component mounts
+
     useEffect(() => {
         if (categories.length === 0) {
             dispatch(getAllCategories());
         }
     }, [dispatch, categories.length]);
 
-    // Handle success navigation
+
     useEffect(() => {
         if (success) {
             navigate('/');
@@ -183,7 +183,7 @@ export function StartWritting() {
         }
     }, [success, navigate, dispatch]);
 
-    // Clear any existing errors when component mounts
+
     useEffect(() => {
         dispatch(clearError());
         return () => {
@@ -219,7 +219,7 @@ export function StartWritting() {
             alert('Image URL is required');
             return false;
         } else {
-            // Basic URL validation
+
             try {
                 new URL(imageUrl);
             } catch {
@@ -238,14 +238,14 @@ export function StartWritting() {
             return;
         }
 
-        // Double check authentication before submitting
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token || isTokenExpired(token)) {
             performAutoLogout(navigate, dispatch, 'Session expired. Please log in again');
             return;
         }
 
-        // Dispatch the create story action
+
         dispatch(createStoryRequest({
             name,
             category,
@@ -262,9 +262,9 @@ export function StartWritting() {
         navigate('/');
     };
 
-    // Get session info for display
+
     const getSessionInfo = () => {
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) return null;
 
         const decoded = decodeJWT(token);
@@ -283,7 +283,7 @@ export function StartWritting() {
 
     const sessionInfo = getSessionInfo();
 
-    // Show loading if authentication is being checked
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
@@ -297,7 +297,7 @@ export function StartWritting() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-            {/* Session Status Indicator */}
+
             {sessionInfo && (
                 <div className={`${sessionInfo.totalSeconds <= 300 ? 'bg-red-100 border-red-200' : 'bg-green-100 border-green-200'} border-b`}>
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
@@ -316,7 +316,7 @@ export function StartWritting() {
                 </div>
             )}
 
-            {/* Header */}
+
             <div className="bg-white shadow-sm border-b">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
@@ -334,10 +334,10 @@ export function StartWritting() {
                 </div>
             </div>
 
-            {/* Form */}
+
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Story Name */}
+
                     <div className="bg-white rounded-xl shadow-lg p-8">
                         <div className="mb-6">
                             <label htmlFor="name"
@@ -358,9 +358,9 @@ export function StartWritting() {
                         </div>
                     </div>
 
-                    {/* Category & Image URL */}
+
                     <div className="grid md:grid-cols-2 gap-8">
-                        {/* Category */}
+
                         <div className="bg-white rounded-xl shadow-lg p-8">
                             <label htmlFor="category"
                                    className="flex items-center text-lg font-semibold text-gray-900 mb-3">
@@ -388,7 +388,7 @@ export function StartWritting() {
                             </select>
                         </div>
 
-                        {/* Image URL */}
+
                         <div className="bg-white rounded-xl shadow-lg p-8">
                             <label htmlFor="imageUrl"
                                    className="flex items-center text-lg font-semibold text-gray-900 mb-3">
@@ -420,7 +420,7 @@ export function StartWritting() {
                         </div>
                     </div>
 
-                    {/* Story Content */}
+
                     <div className="bg-white rounded-xl shadow-lg p-8">
                         <label htmlFor="content" className="flex items-center text-lg font-semibold text-gray-900 mb-3">
                             <span className="mr-2">✍️</span>
@@ -443,7 +443,7 @@ export function StartWritting() {
                         </div>
                     </div>
 
-                    {/* Author Info Display (Read-only) */}
+
                     <div className="bg-gray-50 rounded-xl p-6">
                         <div className="grid md:grid-cols-2 gap-4 mb-4">
                             <div className="flex items-center mr-2">
@@ -476,7 +476,7 @@ export function StartWritting() {
                         </div>
                     </div>
 
-                    {/* Error Display */}
+
                     {error && (
                         <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
                             <div className="flex items-center">
@@ -486,7 +486,7 @@ export function StartWritting() {
                         </div>
                     )}
 
-                    {/* Action Buttons */}
+
                     <div className="flex flex-col sm:flex-row gap-4 justify-end">
                         <button
                             type="button"

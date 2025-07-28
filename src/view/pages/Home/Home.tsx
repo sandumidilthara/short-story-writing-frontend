@@ -92,7 +92,7 @@ export function Home() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-            {/* Hero Section */}
+
             <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-transparent to-blue-100 opacity-50"></div>
                 <div className="max-w-7xl mx-auto relative">
@@ -122,7 +122,7 @@ export function Home() {
                                     Start Writing Today
                                 </Link>
 
-                                {/* Dropdown Button */}
+
                                 <div className="relative">
                                     <button
                                         onClick={handleToggleDropdown}
@@ -140,7 +140,7 @@ export function Home() {
                                         </svg>
                                     </button>
 
-                                    {/* Dropdown Menu */}
+
                                     {isDropdownOpen && (
                                         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
                                             {loading && (
@@ -230,8 +230,7 @@ export function Home() {
                 </div>
             </section>
 
-            {/* Features Section */}
-            {/* Features Section */}
+
             <section id="features" className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
@@ -263,7 +262,7 @@ export function Home() {
                     </div>
                 </div>
             </section>
-            {/* Benefits Section */}
+
             <section id="benefits" className="py-20 bg-gradient-to-br from-purple-50 to-blue-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">

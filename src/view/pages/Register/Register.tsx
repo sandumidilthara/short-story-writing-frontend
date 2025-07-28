@@ -26,7 +26,7 @@ export function Register() {
         success
     } = useSelector((state: RootState) => state.register);
 
-    // Handle success navigation
+
     useEffect(() => {
         if (success) {
             // Show success alert
@@ -37,7 +37,7 @@ export function Register() {
         }
     }, [success, navigate, dispatch]);
 
-    // Clear any existing errors when component mounts
+
     useEffect(() => {
         dispatch(clearError());
         return () => {
@@ -62,7 +62,7 @@ export function Register() {
             return false;
         }
 
-        // Basic email validation
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             alert('Please enter a valid email address');
@@ -94,7 +94,7 @@ export function Register() {
             return;
         }
 
-        // Dispatch the register user action
+
         dispatch(registerUser({
             name,
             email,
@@ -105,7 +105,7 @@ export function Register() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4">
-            {/* Background Decorative Elements */}
+
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 left-20 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
                 <div className="absolute top-40 right-20 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div>
@@ -113,9 +113,9 @@ export function Register() {
             </div>
 
             <div className="relative w-full max-w-md">
-                {/* Main Register Card */}
+
                 <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20">
-                    {/* Header */}
+
                     <div className="text-center mb-8">
                         <div className="inline-flex items-center bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
                             <span className="mr-2">🌟</span>
@@ -129,9 +129,9 @@ export function Register() {
                         </p>
                     </div>
 
-                    {/* Register Form */}
+
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Full Name Field */}
+
                         <div className="space-y-2">
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                                 Full Name
@@ -153,7 +153,7 @@ export function Register() {
                             </div>
                         </div>
 
-                        {/* Email Field */}
+
                         <div className="space-y-2">
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 Email Address
@@ -175,7 +175,7 @@ export function Register() {
                             </div>
                         </div>
 
-                        {/* Password Field */}
+
                         <div className="space-y-2">
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                 Password
@@ -197,7 +197,7 @@ export function Register() {
                             </div>
                         </div>
 
-                        {/* Terms and Conditions */}
+
                         <div className="flex items-start space-x-3">
                             <input
                                 type="checkbox"
@@ -220,7 +220,7 @@ export function Register() {
                             </label>
                         </div>
 
-                        {/* Error Display */}
+
                         {error && (
                             <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
                                 <div className="flex items-center">
@@ -230,7 +230,7 @@ export function Register() {
                             </div>
                         )}
 
-                        {/* Register Button */}
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -255,7 +255,7 @@ export function Register() {
                         </button>
                     </form>
 
-                    {/* Login Link */}
+
                     <div className="text-center mt-8 pt-6 border-t border-gray-200">
                         <p className="text-gray-600">
                             Already have an account?{" "}
@@ -268,7 +268,7 @@ export function Register() {
                     </div>
                 </div>
 
-                {/* Bottom Benefits Card */}
+
                 <div className="mt-8 bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                     <div className="text-center mb-4">
                         <h3 className="font-semibold text-gray-900 text-sm">Why Join Us?</h3>
@@ -289,7 +289,7 @@ export function Register() {
                     </div>
                 </div>
 
-                {/* Success Badges */}
+
                 <div className="absolute -top-4 -right-4 bg-white p-3 rounded-2xl shadow-xl">
                     <div className="flex items-center space-x-2">
                         <div className="bg-blue-100 p-1.5 rounded-lg">

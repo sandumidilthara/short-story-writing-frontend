@@ -1,4 +1,5 @@
 import {Link} from "react-router-dom";
+import {useEffect, useState} from "react";
 
 
 
@@ -7,6 +8,22 @@ export  function Navbar() {
 
 
 
+
+
+    const [userrole , setUserRole]  = useState<string | null>(null);
+    useEffect(()=>{
+
+
+
+        const userInfoString = localStorage.getItem("userInfo");
+        if (userInfoString) {
+            const userInfo = JSON.parse(userInfoString);
+            const role = userInfo.role;
+            setUserRole(role)// "USER"
+        }
+
+
+    } , [])
 
 
     return (
@@ -38,9 +55,18 @@ export  function Navbar() {
                         <a href="/myStories"
                            className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">My
                             Stories</a>
-                        <a href="/contact"
-                           className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">Contact
-                            Us</a>
+                        <a href="/rules"
+                           className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">Rules & Policies
+                            </a>
+
+                        { userrole === "ADMIN" ? (
+                            <a href="/admin"
+                               className="text-gray-600 hover:text-purple-600 font-medium transition duration-300">Go To
+                                Dashboard</a>
+                        ) : (
+                            <p>
+
+                            </p> )}
 
                     </div>
                     <div className="flex space-x-4">
@@ -57,3 +83,5 @@ export  function Navbar() {
 
     );
 }
+
+

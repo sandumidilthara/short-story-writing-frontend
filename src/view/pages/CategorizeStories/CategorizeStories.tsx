@@ -106,7 +106,7 @@ export function CategorizeStories() {
 
 
                                     <div className="p-6 space-y-4">
-                                        {/* Story Title */}
+
                                         <h3 className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors duration-300 line-clamp-2">
                                             {story.name}
                                         </h3>
