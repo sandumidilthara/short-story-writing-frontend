@@ -86,7 +86,7 @@ const storySlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Fetch stories by category
+
             .addCase(fetchStoriesByCategory.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -100,7 +100,7 @@ const storySlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Fetch story by ID
+
             .addCase(fetchStoryById.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -114,7 +114,7 @@ const storySlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Delete story
+
             .addCase(deleteStory.pending, (state) => {
                 state.deleteLoading = true;
                 state.deleteError = null;
@@ -123,10 +123,10 @@ const storySlice = createSlice({
                 state.deleteLoading = false;
                 const { storyId } = action.payload;
 
-                // Remove story from stories array if it exists
+
                 state.stories = state.stories.filter(story => story.id !== storyId);
 
-                // Clear current story if it's the one being deleted
+
                 if (state.currentStory?.id === storyId) {
                     state.currentStory = null;
                 }

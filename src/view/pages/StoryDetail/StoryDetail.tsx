@@ -18,7 +18,7 @@ export function StoryDetail() {
         if (userInfoString) {
             const userInfo = JSON.parse(userInfoString);
             const role = userInfo.role;
-            setUserRole(role); // "USER" or "ADMIN"
+            setUserRole(role);
         }
     }, []);
 
@@ -89,7 +89,7 @@ export function StoryDetail() {
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
 
             {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
                         <div className="text-center">
                             <div className="text-red-500 text-4xl mb-4">⚠️</div>
@@ -198,7 +198,7 @@ export function StoryDetail() {
 
                     <section className="relative py-16 px-4 sm:px-6 lg:px-8">
                         <div className="max-w-4xl mx-auto">
-                            {/* Story Image */}
+
                             {currentStory.imageUrl && (
                                 <div className="relative h-96 mb-8 rounded-3xl overflow-hidden shadow-2xl">
                                     <img

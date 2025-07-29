@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { backendApi } from '../api.ts'; // Adjust path as needed
+import { backendApi } from '../api.ts';
 
-// TypeScript interface - matching backend
+
 export interface UserDto {
     id: string;
     name: string;
@@ -28,7 +28,7 @@ const initialState: AdminUserState = {
     selectedUser: null
 };
 
-// Async thunks for API calls
+
 export const fetchUsers = createAsyncThunk(
     'adminUser/fetchUsers',
     async (_, { rejectWithValue }) => {
@@ -91,7 +91,7 @@ const adminUserSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        // Fetch Users
+
         builder
             .addCase(fetchUsers.pending, (state) => {
                 state.loading = true;
@@ -106,7 +106,7 @@ const adminUserSlice = createSlice({
                 state.error = action.payload as string;
             });
 
-        // Delete User
+
         builder
             .addCase(deleteUser.pending, (state) => {
                 state.error = null;
@@ -118,7 +118,7 @@ const adminUserSlice = createSlice({
                 state.error = action.payload as string;
             });
 
-        // Get User By ID
+
         builder
             .addCase(getUserById.pending, (state) => {
                 state.error = null;

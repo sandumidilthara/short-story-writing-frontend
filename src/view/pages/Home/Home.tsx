@@ -26,7 +26,7 @@ export function Home() {
 
     const handleToggleDropdown = () => {
         dispatch(toggleDropdown());
-        // Fetch categories when opening dropdown for the first time
+
         if (!isDropdownOpen && categories.length === 0) {
             dispatch(getAllCategories());
         }

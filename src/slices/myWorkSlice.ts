@@ -55,7 +55,7 @@ const initialState: MyWorkState = {
     isUpdating: false
 };
 
-// Async thunks
+
 export const loadUserStories = createAsyncThunk(
     'myWork/loadUserStories',
     async (_, { rejectWithValue }) => {
@@ -98,7 +98,7 @@ export const deleteStory = createAsyncThunk(
     'myWork/deleteStory',
     async (storyId: string, { rejectWithValue }) => {
         try {
-            // Add validation for storyId
+
             if (!storyId || storyId.trim() === '') {
                 throw new Error('Story ID is required');
             }
@@ -117,7 +117,7 @@ export const updateStory = createAsyncThunk(
     'myWork/updateStory',
     async ({ storyId, updateData }: { storyId: string; updateData: UpdateStoryPayload }, { rejectWithValue, getState }) => {
         try {
-            // Add validation for storyId
+
             if (!storyId || storyId.trim() === '') {
                 throw new Error('Story ID is required for update');
             }
@@ -144,17 +144,17 @@ export const updateStory = createAsyncThunk(
 
             console.log('Update response:', response.data);
 
-            // Handle different possible response structures
+
             let updatedStory: Story;
 
             if (response.data && response.data.story) {
-                // If response has story property
+
                 updatedStory = response.data.story;
             } else if (response.data && response.data.id) {
-                // If response is the story itself
+
                 updatedStory = response.data;
             } else {
-                // If we need to construct the updated story manually
+
                 const state = getState() as any;
                 const currentStory = state.myWork.editingStory;
 
@@ -164,7 +164,7 @@ export const updateStory = createAsyncThunk(
                     category: updateData.category.trim(),
                     content: updateData.content.trim(),
                     imageUrl: updateData.imageUrl.trim() || currentStory.imageUrl,
-                    // Keep other properties from current story
+
                     id: storyId,
                     author: currentStory.author,
                     authorEmail: currentStory.authorEmail,
@@ -172,7 +172,7 @@ export const updateStory = createAsyncThunk(
                 };
             }
 
-            // Ensure the story has an id
+
             if (!updatedStory.id) {
                 updatedStory.id = storyId;
             }
@@ -233,7 +233,7 @@ const myWorkSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Load user stories
+
             .addCase(loadUserStories.pending, (state) => {
                 state.loading = true;
                 state.error = '';
@@ -247,7 +247,7 @@ const myWorkSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            // Delete story
+
             .addCase(deleteStory.pending, (state) => {
                 state.error = '';
             })
@@ -257,7 +257,7 @@ const myWorkSlice = createSlice({
             .addCase(deleteStory.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
-            // Update story
+
             .addCase(updateStory.pending, (state) => {
                 state.isUpdating = true;
                 state.error = '';
@@ -266,7 +266,7 @@ const myWorkSlice = createSlice({
                 state.isUpdating = false;
                 const updatedStory = action.payload;
 
-                // Make sure we have a valid story with id
+
                 if (updatedStory && updatedStory.id) {
                     state.stories = state.stories.map(story =>
                         story.id === updatedStory.id ? updatedStory : story

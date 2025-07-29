@@ -7,13 +7,13 @@ import type { AppDispatch, RootState } from '../../../store/store.ts';
 import { getAllCategories } from '../../../slices/homeSlice.ts';
 import {
     createStoryRequest,
+    sendStoryConfirmationEmail,
     updateFormField,
     clearForm,
     clearError,
     resetSuccess,
     setUserFromToken
 } from '../../../slices/startWritingSlice.ts';
-
 
 const decodeJWT = (token: string) => {
     try {
@@ -28,7 +28,6 @@ const decodeJWT = (token: string) => {
         return null;
     }
 };
-
 
 const isTokenExpired = (token: string): boolean => {
     try {
@@ -45,21 +44,14 @@ const isTokenExpired = (token: string): boolean => {
     }
 };
 
-
 const performAutoLogout = (navigate: any, dispatch: any, message: string = 'Your session has expired. Please log in again.') => {
-
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     sessionStorage.removeItem('refreshToken');
 
-
     dispatch(clearForm());
-
-
     alert(message);
-
-
     navigate('/login');
 };
 
@@ -68,7 +60,7 @@ export function StartWritting() {
     const dispatch = useDispatch<AppDispatch>();
     const intervalRef = useRef<number | null>(null);
     const warningShownRef = useRef<boolean>(false);
-
+    const storyDataRef = useRef<any>(null); // Store story data for email
 
     const { categories, loading: categoriesLoading } = useSelector((state: RootState) => state.home);
     const {
@@ -82,9 +74,9 @@ export function StartWritting() {
         loading,
         error,
         success,
-        isAuthenticated
+        isAuthenticated,
+        emailSending
     } = useSelector((state: RootState) => state.write);
-
 
     const checkTokenExpiry = useCallback(() => {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -99,12 +91,10 @@ export function StartWritting() {
             return;
         }
 
-
         const decoded = decodeJWT(token);
         if (decoded && decoded.exp) {
             const currentTime = Math.floor(Date.now() / 1000);
             const timeUntilExpiry = decoded.exp - currentTime;
-
 
             if (timeUntilExpiry <= 300 && timeUntilExpiry > 0 && !warningShownRef.current) {
                 warningShownRef.current = true;
@@ -112,23 +102,17 @@ export function StartWritting() {
                 alert(`Your session will expire in ${minutes} minute(s). Please save your work and refresh the page to continue.`);
             }
 
-
             if (timeUntilExpiry > 300) {
                 warningShownRef.current = false;
             }
         }
     }, [navigate, dispatch]);
 
-
     useEffect(() => {
-
         checkTokenExpiry();
-
-
         intervalRef.current = setInterval(() => {
             checkTokenExpiry();
         }, 60000);
-
 
         return () => {
             if (intervalRef.current) {
@@ -136,7 +120,6 @@ export function StartWritting() {
             }
         };
     }, [checkTokenExpiry]);
-
 
     useEffect(() => {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -157,7 +140,6 @@ export function StartWritting() {
             return;
         }
 
-
         const userEmail = decodedToken.email || decodedToken.sub || '';
         const username = decodedToken.username || decodedToken.name || userEmail.split('@')[0] || 'Anonymous';
 
@@ -168,7 +150,6 @@ export function StartWritting() {
 
     }, [dispatch, navigate]);
 
-
     useEffect(() => {
         if (categories.length === 0) {
             dispatch(getAllCategories());
@@ -177,12 +158,31 @@ export function StartWritting() {
 
 
     useEffect(() => {
-        if (success) {
-            navigate('/');
-            dispatch(resetSuccess());
-        }
-    }, [success, navigate, dispatch]);
+        if (success && !emailSending && storyDataRef.current) {
+            alert("Story created successfully! Sending confirmation email...");
 
+
+            dispatch(sendStoryConfirmationEmail({
+                userEmail: storyDataRef.current.authorEmail,
+                userName: storyDataRef.current.author,
+                storyTitle: storyDataRef.current.name
+            }));
+
+
+            storyDataRef.current = null;
+        }
+    }, [success, emailSending, dispatch]);
+
+
+    useEffect(() => {
+        if (success && !emailSending && !storyDataRef.current) {
+            setTimeout(() => {
+                alert("Confirmation email sent successfully!");
+                navigate('/');
+                dispatch(resetSuccess());
+            }, 1000);
+        }
+    }, [success, emailSending, navigate, dispatch]);
 
     useEffect(() => {
         dispatch(clearError());
@@ -219,7 +219,6 @@ export function StartWritting() {
             alert('Image URL is required');
             return false;
         } else {
-
             try {
                 new URL(imageUrl);
             } catch {
@@ -238,13 +237,18 @@ export function StartWritting() {
             return;
         }
 
-
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token || isTokenExpired(token)) {
             performAutoLogout(navigate, dispatch, 'Session expired. Please log in again');
             return;
         }
 
+
+        storyDataRef.current = {
+            name,
+            author,
+            authorEmail
+        };
 
         dispatch(createStoryRequest({
             name,
@@ -261,7 +265,6 @@ export function StartWritting() {
         dispatch(clearForm());
         navigate('/');
     };
-
 
     const getSessionInfo = () => {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -283,7 +286,6 @@ export function StartWritting() {
 
     const sessionInfo = getSessionInfo();
 
-
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
@@ -297,7 +299,7 @@ export function StartWritting() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-
+            {/* Session Info Bar */}
             {sessionInfo && (
                 <div className={`${sessionInfo.totalSeconds <= 300 ? 'bg-red-100 border-red-200' : 'bg-green-100 border-green-200'} border-b`}>
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
@@ -317,6 +319,20 @@ export function StartWritting() {
             )}
 
 
+            {emailSending && (
+                <div className="bg-blue-50 border-b border-blue-200">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                        <div className="flex items-center justify-center">
+                            <div className="flex items-center text-blue-700">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                <span>📧 Sending confirmation email...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
             <div className="bg-white shadow-sm border-b">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
@@ -324,7 +340,7 @@ export function StartWritting() {
                         <button
                             onClick={handleCancel}
                             className="text-gray-500 hover:text-gray-700 transition duration-200"
-                            disabled={loading}
+                            disabled={loading || emailSending}
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -340,8 +356,7 @@ export function StartWritting() {
 
                     <div className="bg-white rounded-xl shadow-lg p-8">
                         <div className="mb-6">
-                            <label htmlFor="name"
-                                   className="flex items-center text-lg font-semibold text-gray-900 mb-3">
+                            <label htmlFor="name" className="flex items-center text-lg font-semibold text-gray-900 mb-3">
                                 <span className="mr-2">📝</span>
                                 Story Title
                             </label>
@@ -353,17 +368,15 @@ export function StartWritting() {
                                 onChange={handleInputChange}
                                 placeholder="Enter your story title..."
                                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition duration-200"
-                                disabled={loading}
+                                disabled={loading || emailSending}
                             />
                         </div>
                     </div>
 
 
                     <div className="grid md:grid-cols-2 gap-8">
-
                         <div className="bg-white rounded-xl shadow-lg p-8">
-                            <label htmlFor="category"
-                                   className="flex items-center text-lg font-semibold text-gray-900 mb-3">
+                            <label htmlFor="category" className="flex items-center text-lg font-semibold text-gray-900 mb-3">
                                 <span className="mr-2">📚</span>
                                 Category
                             </label>
@@ -373,7 +386,7 @@ export function StartWritting() {
                                 value={category}
                                 onChange={handleInputChange}
                                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition duration-200"
-                                disabled={loading}
+                                disabled={loading || emailSending}
                             >
                                 <option value="">Select a category...</option>
                                 {categoriesLoading ? (
@@ -388,10 +401,8 @@ export function StartWritting() {
                             </select>
                         </div>
 
-
                         <div className="bg-white rounded-xl shadow-lg p-8">
-                            <label htmlFor="imageUrl"
-                                   className="flex items-center text-lg font-semibold text-gray-900 mb-3">
+                            <label htmlFor="imageUrl" className="flex items-center text-lg font-semibold text-gray-900 mb-3">
                                 <span className="mr-2">🖼️</span>
                                 Cover Image URL
                             </label>
@@ -403,7 +414,7 @@ export function StartWritting() {
                                 onChange={handleInputChange}
                                 placeholder="https://example.com/image.jpg"
                                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition duration-200"
-                                disabled={loading}
+                                disabled={loading || emailSending}
                             />
                             {imageUrl && (
                                 <div className="mt-4">
@@ -434,7 +445,7 @@ export function StartWritting() {
                             placeholder="Start writing your story here..."
                             rows={15}
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition duration-200 resize-none"
-                            disabled={loading}
+                            disabled={loading || emailSending}
                         />
                         <div className="flex justify-between items-center mt-2">
                             <p className="text-gray-500 text-sm ml-auto">
@@ -492,26 +503,32 @@ export function StartWritting() {
                             type="button"
                             onClick={handleCancel}
                             className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition duration-200 font-semibold"
-                            disabled={loading}
+                            disabled={loading || emailSending}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || emailSending}
                             className={`px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition duration-300 font-semibold flex items-center justify-center ${
-                                loading ? 'opacity-75 cursor-not-allowed' : ''
+                                (loading || emailSending) ? 'opacity-75 cursor-not-allowed' : ''
                             }`}
                         >
                             {loading ? (
                                 <>
                                     <svg className="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                     Publishing...
+                                </>
+                            ) : emailSending ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Sending Email...
                                 </>
                             ) : (
                                 <>

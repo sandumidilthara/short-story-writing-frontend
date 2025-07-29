@@ -51,7 +51,7 @@ export function MyWorks() {
         if (error) {
             const timer = setTimeout(() => {
                 dispatch(clearError());
-            }, 5000); // Clear error after 5 seconds
+            }, 5000);
 
             return () => clearTimeout(timer);
         }

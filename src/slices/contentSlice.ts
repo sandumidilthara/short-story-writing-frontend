@@ -31,7 +31,7 @@ const initialState: StoryState = {
     storyError: null,
 };
 
-// Fetch stories by category
+
 export const fetchStoriesByCategory = createAsyncThunk(
     'story/getStoriesByCategory',
     async (categoryName: string) => {
@@ -41,7 +41,7 @@ export const fetchStoriesByCategory = createAsyncThunk(
     }
 );
 
-// Fetch individual story by ID
+
 export const fetchStoryById = createAsyncThunk(
     'story/getStory',
     async (storyId: string, { rejectWithValue }) => {
@@ -69,7 +69,7 @@ const storySlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Fetch stories by category
+
             .addCase(fetchStoriesByCategory.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -82,7 +82,7 @@ const storySlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            // Fetch individual story
+
             .addCase(fetchStoryById.pending, (state) => {
                 state.storyLoading = true;
                 state.storyError = null;

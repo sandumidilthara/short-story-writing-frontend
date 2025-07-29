@@ -38,7 +38,7 @@ export function Login() {
             const responseData = response.data;
             let token = null;
 
-            // Check common token field names
+
             if (responseData.token) {
                 token = responseData.token;
             } else if (responseData.accessToken) {

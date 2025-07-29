@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { backendApi } from '../api.ts'; // Adjust path as needed
+import { backendApi } from '../api.ts';
 
-// TypeScript interface - matching backend
+
 export interface CategoryDto {
     id: string;
     name: string;
@@ -38,7 +38,7 @@ const initialState: AdminCategoryState = {
     }
 };
 
-// Async thunks for API calls
+
 export const fetchCategories = createAsyncThunk(
     'adminCategory/fetchCategories',
     async (_, { rejectWithValue }) => {
@@ -142,7 +142,7 @@ const adminCategorySlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        // Fetch Categories
+
         builder
             .addCase(fetchCategories.pending, (state) => {
                 state.loading = true;
@@ -157,7 +157,7 @@ const adminCategorySlice = createSlice({
                 state.error = action.payload as string;
             });
 
-        // Create Category
+
         builder
             .addCase(createCategory.pending, (state) => {
                 state.submitting = true;
@@ -177,7 +177,7 @@ const adminCategorySlice = createSlice({
                 state.error = action.payload as string;
             });
 
-        // Update Category
+
         builder
             .addCase(updateCategory.pending, (state) => {
                 state.submitting = true;
@@ -201,7 +201,7 @@ const adminCategorySlice = createSlice({
                 state.error = action.payload as string;
             });
 
-        // Delete Category
+
         builder
             .addCase(deleteCategory.pending, (state) => {
                 state.error = null;

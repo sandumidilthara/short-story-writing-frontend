@@ -23,7 +23,7 @@ import type {RootReducerState} from "../../../slices/rootReducer.ts";
 export function ManageCategories() {
     const dispatch = useDispatch();
 
-    // Get state from Redux store
+
     const {
         categories,
         loading,

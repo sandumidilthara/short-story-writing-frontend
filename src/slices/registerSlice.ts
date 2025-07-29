@@ -38,7 +38,7 @@ const initialState: RegisterState = {
     savedUser: null,
 };
 
-// Async thunk for user registration
+
 export const registerUser = createAsyncThunk(
     'register/registerUser',
     async (userData: UserDto, { rejectWithValue }) => {
@@ -87,7 +87,7 @@ const registerSlice = createSlice({
                 state.loading = false;
                 state.success = true;
                 state.savedUser = action.payload;
-                // Clear form after successful registration
+
                 state.name = '';
                 state.email = '';
                 state.password = '';
